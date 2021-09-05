@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Postman
+Comment=Explore and test your APIs
+GenericName=API Client
+Exec=/usr/share/postman/Postman
+Icon=/usr/share/postman/app/resources/app/assets/icon.png
+Type=Application
+StartupNotify=false
+StartupWMClass=Code
+Categories=Utility;API;Development;
+Keywords=postman;
