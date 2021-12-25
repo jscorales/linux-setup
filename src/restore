@@ -66,6 +66,20 @@ dconf load /com/gexperts/Tilix/ < "${source_dir}/tilix/tilix.dconf"
 # brave browser
 rsync -avzh "${source_dir}/Brave-Browser/Default" "${config_dir}/BraveSoftware/Brave-Browser"
 
+# restore zsh config
+cp "${source_dir}/.zshrc" "${HOME}/.zshrc"
+git clone https://github.com/zsh-users/zsh-autosuggestions "${HOME}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "${HOME}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${HOME}/.oh-my-zsh/custom/themes/powerlevel10k"
+cp "${source_dir}/.p10k.zsh" "${HOME}/.p10k.zsh"
+cp "${source_dir}/.zshrc.pre-oh-my-zsh" "${HOME}/.zshrc.pre-oh-my-zsh"
+
+# restore vs code extensions
+while read vscode_extension || [[ -n $vscode_extension ]]; do
+  code --install-extension ${vscode_extension} --force
+done < "${source_dir}/vscode/extensions.txt"
+cp "${source_dir}/vscode/settings.json" "${source_dir}/Code/User/settings.json"
+
 #############################################################################################
 # Gnome Extensions
 #############################################################################################

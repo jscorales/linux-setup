@@ -133,12 +133,6 @@ function install_other_packages() {
   printf "${YELLOW}Setting up Zsh ${NC}\n"
   chsh -s /bin/zsh $TARGET_USER
   run_as_user "git clone --depth=1 https://github.com/robbyrussell/oh-my-zsh.git ${HOME_DIR}/.oh-my-zsh"
-  run_as_user "cp ${CONFIG_backup_dir}/.zshrc ${HOME_DIR}/.zshrc"
-  run_as_user "git clone https://github.com/zsh-users/zsh-autosuggestions ${HOME_DIR}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
-  run_as_user "git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${HOME_DIR}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
-  run_as_user "git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${HOME_DIR}/.oh-my-zsh/custom/themes/powerlevel10k"
-  run_as_user "cp ${CONFIG_backup_dir}/.p10k.zsh ${HOME_DIR}/.p10k.zsh"
-  run_as_user "cp ${CONFIG_backup_dir}/.zshrc.pre-oh-my-zsh ${HOME_DIR}/.zshrc.pre-oh-my-zsh"
 
   vte_sh="/etc/profile.d/vte.sh"
   vte_291_sh="/etc/profile.d/vte-2.91.sh"
@@ -154,13 +148,6 @@ function install_other_packages() {
   # Node 12
   # printf "${YELLOW}Installing node 12${NC}\n"
   # zsh -c ". ${HOME_DIR}/.zshrc && nvm install 12"
-
-  # Setup VS Code
-  # Install extensions
-  while read vscode_extension || [[ -n $vscode_extension ]]; do
-    run_as_user "code --install-extension ${vscode_extension} --force"
-  done < "${CONFIG_backup_dir}/vscode/extensions.txt"
-  run_as_user "cp '${CONFIG_backup_dir}/vscode/settings.json' '${CONFIG_DIR}/Code/User/settings.json'"
 
   # sudo chown -R plex: /media/data/Media
 }
