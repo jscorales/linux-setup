@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Robo 3T
+Comment=Native and cross-platform MongoDB manager
+GenericName=MongoDB GUI
+Exec=/usr/bin/robo3t
+Icon=/usr/share/robo3t/bin/robo3t.png
+Type=Application
+StartupNotify=false
+StartupWMClass=Code
+Categories=IDE;Development;
+Keywords=Database;MongoDB;robo3t;

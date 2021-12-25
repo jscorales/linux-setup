@@ -1,0 +1,3 @@
+Package: *
+Pin: origin "dbeaver.io"
+Pin-Priority: 1002

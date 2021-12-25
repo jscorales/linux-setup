@@ -1,0 +1,81 @@
+#!/bin/bash
+
+. "$(dirname "$0")/utils/common.sh"
+. "$(dirname "$0")/utils/config.sh"
+
+set -euo pipefail
+
+declare -a mounted_drives=()
+
+function mount_drive() {
+  local drive_uuid mount_point fs_type mount_options
+
+  while [ "$1" != "" ]; do
+    case $1 in
+    --uuid)
+      shift
+      drive_uuid=$1
+      ;;
+    --mount-point)
+      shift
+      mount_point=$1
+      ;;
+    --options)
+      shift
+      mount_options=$1
+      ;;
+    --fs-type)
+      shift
+      fs_type=$1
+      ;;
+    *)
+      printf "Invalid function arguments for ${FUNCNAME[0]}\n"
+      exit
+      ;;
+    esac
+    shift
+  done
+
+  printf "${YELLOW}Mounting drive with UUID: ${drive_uuid}...${NC}"
+
+  if ! eval "grep -q '${drive_uuid}' /etc/fstab"; then
+    mkdir -p "${mount_point}"
+    echo "UUID=${drive_uuid} ${mount_point} ${fs_type} ${mount_options} 0 0" >> /etc/fstab
+    mounted_drives+=($drive_uuid)
+    printf "${GREEN} OK${NC}\n"
+  else
+    printf "${YELLOW} already mounted, skipping${NC}\n"
+  fi
+}
+
+function mount_drives() {
+  local num_drives=${#CONFIG_drives__uuid[@]}
+
+  if [[ $num_drives -eq 0 ]]; then
+    printf "${YELLOW}Nothing to mount.${NC}\n"
+    exit
+  fi
+
+  for (( i = 0; i < $num_drives; i++ )); do
+    mount_drive \
+      --uuid "${CONFIG_drives__uuid[i]}" \
+      --mount-point "${CONFIG_drives__mount_point[i]}" \
+      --options "${CONFIG_drives__options[i]}" \
+      --fs-type "${CONFIG_drives__fs_type[i]}"
+  done
+
+  if [[ ${#mounted_drives[@]} -eq 0 ]]; then
+    printf "${YELLOW}No drives mounted.${NC}\n"
+    exit
+  fi
+
+  if [[ -z $(mount -a) ]]; then
+    read -p "Drives mounted, reboot? [y/N]: " reboot_resp
+
+    if [[ $reboot_resp = "y" || $reboot = "Y" ]]; then
+      reboot
+    fi
+  fi
+}
+
+mount_drives

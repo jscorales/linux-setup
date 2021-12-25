@@ -1,0 +1,92 @@
+#!/bin/bash
+
+. "$(dirname "$0")/utils/common.sh"
+. "$(dirname "$0")/utils/gnome-extensions.sh"
+
+set -euo pipefail
+
+old_ifs=$IFS
+IFS=$'\n\t'
+
+backup_dir=${1-""}
+
+if [[ -z $backup_dir ]]; then
+  printf "${RED}Backup destination directory is not set${NC}\n"
+  printf "${YELLOW}Usage: ${NC}backup DEST=/path/to/destination/dir\n"
+  exit 1
+fi
+
+if [[ ! -d $backup_dir ]]; then
+  printf "${RED}Destination directory ${backup_dir} is not accessible or does not exist${NC}\n"
+  exit 1
+fi
+
+config_dir="${HOME}/.config"
+local_share_dir="${HOME}/.local/share"
+
+dirs_to_backup=(
+  "${HOME}/.3T"
+  "${HOME}/.themes"
+  "${HOME}/.ssh"
+  "${HOME}/Calibre Library"
+  "${HOME}/Desktop"
+  "${HOME}/Documents"
+  "${HOME}/Downloads"
+  "${HOME}/Music"
+  "${HOME}/Pictures"
+  "${HOME}/Projects"
+  "${HOME}/Videos"
+  "${HOME}/VirtualBox VMs"
+  "${local_share_dir}/backgrounds"
+  "${local_share_dir}/fonts"
+  "${local_share_dir}/gnote"
+  "${local_share_dir}/bypass-paywalls-chrome-master"
+)
+
+# Backup directories
+for dir in ${dirs_to_backup[@]}; do
+  rsync -avzh --exclude={'node_modules', 'data-db'} --progress $dir $backup_dir
+done
+
+# git
+rsync -avzh "${HOME}/.gitconfig" "${backup_dir}"
+rsync -avzh "${HOME}/.gitignore" "${backup_dir}"
+
+# npmrc
+rsync -avzh "${HOME}/.npmrc" "${backup_dir}"
+
+# p10K
+rsync -avzh "${HOME}/.p10k.zsh" "${backup_dir}"
+
+# zshrc
+rsync -avzh "${HOME}/.zshrc" "${backup_dir}"
+rsync -avzh "${HOME}/.zshrc.pre-oh-my-zsh" "${backup_dir}"
+
+# pop-shell
+rsync -avzh "${config_dir}/pop-shell/config.json" "${backup_dir}/pop-shell"
+
+# vscode
+mkdir -p "${backup_dir}/vscode"
+code --list-extensions > "${backup_dir}/vscode/extensions.txt"
+rsync -avzh "${config_dir}/Code/User/settings.json" "${backup_dir}/vscode"
+
+# sublime text
+rsync -avzh "${config_dir}/sublime-text" "${backup_dir}"
+
+# dbeaver data
+dbeaver_data_dir="${local_share_dir}/DBeaverData"
+rsync -avzh "${dbeaver_data_dir}/Scripts" "${backup_dir}/dbeaver"
+rsync -avzh "${dbeaver_data_dir}/.dbeaver" "${backup_dir}/dbeaver"
+
+# brave browser
+mkdir -p "${backup_dir}/Brave-Browser"
+rsync -avzh "${config_dir}/BraveSoftware/Brave-Browser/Default" "${backup_dir}/Brave-Browser"
+
+# tilix
+mkdir -p "${backup_dir}/tilix"
+dconf dump /com/gexperts/Tilix/ > "${backup_dir}/tilix/tilix.dconf"
+
+IFS=$old_ifs
+
+# gnome extensions
+extension_settings --mode backup --backup-dir "${backup_dir}/gnome-shell-extensions"

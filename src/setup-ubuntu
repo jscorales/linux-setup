@@ -1,0 +1,187 @@
+#!/bin/bash
+
+. "$(dirname "$0")/utils/common.sh"
+. "$(dirname "$0")/utils/repo-setup.sh"
+. "$(dirname "$0")/utils/gnome-extensions.sh"
+. "$(dirname "$0")/utils/config.sh"
+
+function add_apt_repositories() {
+  local num_apt_repos="${#CONFIG_apt_repos__key_name[@]}"
+  local num_ppa_repos="${#CONFIG_apt_ppa_repos[@]}"
+  local source_pref_dir="preferences.d"
+
+  # Add APT repositories
+  if [[ $num_apt_repos -gt 0 ]]; then
+    printf "${YELLOW}Adding APT Repositories${NC}\n"
+    for repo in "${!CONFIG_apt_repos__key_name[@]}"; do
+      add_apt_repository \
+        --name ${repo} \
+        --source "${CONFIG_apt_repos__source[${repo}]}" \
+        --key-name "${CONFIG_apt_repos__key_name[${repo}]}" \
+        --key-url "${CONFIG_apt_repos__key_url[${repo}]}"
+    done
+  fi
+
+  # Add PPA repositories
+  if [[ $num_ppa_repos -gt 0 ]]; then
+    printf "${YELLOW}Adding PPA Repositories${NC}\n"
+    for ppa_repo in "${CONFIG_apt_ppa_repos[@]}"; do
+      printf "${YELLOW}=> Adding ${ppa_repo} PPA${NC}\n"
+      add-apt-repository ${ppa_repo}
+    done
+  fi
+
+  # Add source preference(s)
+  if [ -d $source_pref_dir ]; then
+    for pref_file in "${source_pref_dir}/*"; do
+      run_as_user "cp $pref_file /etc/apt/preferences.d/$(basename $pref_file)"
+    done
+  fi
+
+  apt update
+}
+
+function install_apt_packages() {
+  local num_packages=${#CONFIG_apt_packages[@]}
+
+  if [[ $num_packages -gt 0 ]]; then
+    printf "${YELLOW}Install APT packages${NC}\n"
+
+    for (( i = 0; i < $num_packages; i++ )); do
+      printf "${YELLOW}=> Installing ${CONFIG_apt_packages[i]}${NC}\n"
+      apt install -y "${CONFIG_apt_packages[i]}"
+    done
+  fi
+}
+
+function install_gnome_extensions() {
+  local num_extensions=${#CONFIG_gnome_extensions__name[@]}
+  local extension_schema_dir extension_uuid
+  if [[ $num_extensions -eq 0 ]]; then
+    return
+  fi
+
+  printf "${YELLOW}Install Gnome Extensions${NC}\n"
+  for extension in "${!CONFIG_gnome_extensions__name[@]}"; do
+    printf "${YELLOW}=> Installing ${extension}${NC}\n"
+    install_extension \
+      --name "${CONFIG_gnome_extensions__name[${extension}]}" \
+      --package "${CONFIG_gnome_extensions__package[${extension}]}"
+  done
+}
+
+function install_prerequisites() {
+  apt install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg-agent \
+    software-properties-common \
+    wget \
+    git -y
+}
+
+function install_other_packages() {
+  # Docker Compose
+  printf "${YELLOW}Installing docker compose${NC}\n"
+  curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" \
+    -o /usr/local/bin/docker-compose
+  chmod +x /usr/local/bin/docker-compose
+  # Docker user group
+  usermod -aG docker $USER
+  # Copy docker daemon config
+  cp ./docker/daemon.json /etc/docker/daemon.json
+
+  # Slack
+  printf "${YELLOW}Installing Slack${NC}\n"
+  wget -qO slack-desktop.deb https://downloads.slack-edge.com/linux_releases/slack-desktop-4.19.2-amd64.deb
+  sudo apt install ./slack-desktop.deb -y
+  rm ./slack-desktop.deb
+
+  # Postman
+  printf "${YELLOW}Installing Postman ${NC}\n"
+  wget -O postman.tar.gz https://dl.pstmn.io/download/latest/linux64
+  tar -xzf ./postman.tar.gz
+  mv Postman /usr/share/postman
+  # Copy Postman desktop entry
+  cp ./postman/postman.desktop /usr/share/applications/postman.desktop
+  rm ./postman.tar.gz
+
+  # Pulse UI
+  printf "${YELLOW}Installing Pulse UI ${NC}\n"
+  run_as_user "cp ./pulse/Pulse-linux-9.1r11.0-64bit.deb ./Pulse-linux-9.1r11.0-64bit.deb"
+  apt install ./Pulse-linux-9.1r11.0-64bit.deb -y
+  rm ./Pulse-linux-9.1r11.0-64bit.deb
+
+  # Robo 3T
+  printf "${YELLOW}Installing Robo 3T ${NC}\n"
+  wget -O robo3t.tar.gz https://download.studio3t.com/robomongo/linux/robo3t-1.4.4-linux-x86_64-e6ac9ec.tar.gz
+  run_as_user "mkdir -p robo3t"
+  run_as_user "tar -xzf ./robo3t.tar.gz -C robo3t --strip-components=1"
+  mv robo3t /usr/share/robo3t
+  ln -s /usr/share/robo3t/bin/robo3t /usr/bin/robo3t
+  rm ./robo3t.tar.gz
+  # Copy Robo 3T desktop entry
+  cp ./robo-3t/robo3t.desktop /usr/share/applications/robo3t.desktop
+  cp ./robo-3t/robo3t.png /usr/share/robo3t/bin/robo3t.png
+
+  # Calibre
+  printf "${YELLOW}Installing Calibre ${NC}\n"
+  sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
+
+  # Setup Zsh
+  printf "${YELLOW}Setting up Zsh ${NC}\n"
+  chsh -s /bin/zsh $TARGET_USER
+  run_as_user "git clone --depth=1 https://github.com/robbyrussell/oh-my-zsh.git ${HOME_DIR}/.oh-my-zsh"
+  run_as_user "cp ${CONFIG_backup_dir}/.zshrc ${HOME_DIR}/.zshrc"
+  run_as_user "git clone https://github.com/zsh-users/zsh-autosuggestions ${HOME_DIR}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+  run_as_user "git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${HOME_DIR}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+  run_as_user "git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${HOME_DIR}/.oh-my-zsh/custom/themes/powerlevel10k"
+  run_as_user "cp ${CONFIG_backup_dir}/.p10k.zsh ${HOME_DIR}/.p10k.zsh"
+  run_as_user "cp ${CONFIG_backup_dir}/.zshrc.pre-oh-my-zsh ${HOME_DIR}/.zshrc.pre-oh-my-zsh"
+
+  vte_sh="/etc/profile.d/vte.sh"
+  vte_291_sh="/etc/profile.d/vte-2.91.sh"
+
+  if [[ ! -f $vte_sh ]] && [[ -f $vte_291_sh ]]; then
+    ln -s $vte_291_sh $vte_sh
+  fi
+
+  # NVM
+  printf "${YELLOW}Installing nvm${NC}\n"
+  run_as_user "wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | zsh"
+
+  # Node 12
+  # printf "${YELLOW}Installing node 12${NC}\n"
+  # zsh -c ". ${HOME_DIR}/.zshrc && nvm install 12"
+
+  # Setup VS Code
+  # Install extensions
+  while read vscode_extension || [[ -n $vscode_extension ]]; do
+    run_as_user "code --install-extension ${vscode_extension} --force"
+  done < "${CONFIG_backup_dir}/vscode/extensions.txt"
+  run_as_user "cp '${CONFIG_backup_dir}/vscode/settings.json' '${CONFIG_DIR}/Code/User/settings.json'"
+
+  # sudo chown -R plex: /media/data/Media
+}
+
+# Check if script is running with sudo
+is_sudo
+
+# Prompt for username
+prompt_target_user
+
+# Install prerequisites
+install_prerequisites
+
+# Add apt repositories
+add_apt_repositories
+
+# Install apt packages
+install_apt_packages
+
+# Install other packages
+install_other_packages
+
+# Install gnome extensions
+install_gnome_extensions

@@ -1,0 +1,66 @@
+#!/bin/bash
+
+. "$(dirname "$0")/utils/common.sh"
+. "$(dirname "$0")/utils/config.sh"
+
+source_dir=${1-""}
+
+if [[ -z $source_dir ]]; then
+  printf "${RED}Source directory is not set${NC}\n"
+  printf "${YELLOW}Usage: ${NC}restore SOURCE=/path/to/source/dir\n"
+  exit 1
+fi
+
+if [[ ! -d $source_dir ]]; then
+  printf "${RED}Source directory ${source_dir} is not accessible or does not exist${NC}\n"
+  exit 1
+fi
+
+config_dir="${HOME}/.config"
+
+function update_config() {
+  local pop_shell_config_dir="${config_dir}/pop-shell"
+  local float_classes=""
+  # Get list of floating window classes
+  local classes=$(
+    grep "\"class\":" < "${source_dir}/pop-shell/config.json" \
+      | sed -e "s/^[[:space:]]*\"class\":[[:space:]]//g" \
+            -e "s/\"$/\";/"
+  )
+
+  # TODO: Check dupes???
+  while IFS=';' read -ra class; do
+    for i in "${class[@]}"; do
+      if [[ -z $float_classes ]]; then
+        float_classes="[{ \"class\": ${class} }"
+      else
+        float_classes="${float_classes}, { \"class\": ${i} }"
+      fi
+    done
+  done <<< $classes
+
+  if [[ ! -z $float_classes ]]; then
+    float_classes="${float_classes}]"
+  fi
+
+  # Backup existing config file
+  cp "${pop_shell_config_dir}/config.json" "${pop_shell_config_dir}/config.json.bak"
+  jq --argjson float_classes "${float_classes}" '.float += $float_classes' "${pop_shell_config_dir}/config.json" > "${pop_shell_config_dir}/config.json.tmp"
+
+  mv "${pop_shell_config_dir}/config.json.tmp" "${pop_shell_config_dir}/config.json"
+}
+
+function update_settings() {
+  # Update pop-shell settings
+  gsettings set org.gnome.shell.extensions.pop-shell activate-launcher "['<Super>space']"
+  gsettings set org.gnome.shell.extensions.pop-shell active-hint true
+  gsettings set org.gnome.shell.extensions.pop-shell gap-inner 3
+  gsettings set org.gnome.shell.extensions.pop-shell gap-outer 3
+  gsettings set org.gnome.shell.extensions.pop-shell hint-color-rgba 'rgb(0,122,204)'
+  gsettings set org.gnome.shell.extensions.pop-shell show-title false
+}
+
+update_config
+update_settings
+
+printf "${YELLOW}Done updating pop-shell config...${NC}\n"

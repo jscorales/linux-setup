@@ -1,0 +1,145 @@
+#!/bin/bash
+
+. "$(dirname "$0")/utils/common.sh"
+. "$(dirname "$0")/utils/gnome-extensions.sh"
+
+set -euo pipefail
+
+source_dir=${1-""}
+
+if [[ -z $source_dir ]]; then
+  printf "${RED}Source directory is not set${NC}\n"
+  printf "${YELLOW}Usage: ${NC}restore SOURCE=/path/to/source/dir\n"
+  exit 1
+fi
+
+if [[ ! -d $source_dir ]]; then
+  printf "${RED}Source directory ${source_dir} is not accessible or does not exist${NC}\n"
+  exit 1
+fi
+
+config_dir="${HOME}/.config"
+local_share_dir="${HOME}/.local/share"
+gnome_extensions_dir="${local_share_dir}/gnome-shell/extensions"
+
+printf "${YELLOW}Restoring settings${NC}\n"
+
+rsync -avzh "${source_dir}/.3T" "${HOME}"
+rsync -avzh "${source_dir}/.themes" "${HOME}"
+rsync -avzh "${source_dir}/.ssh" "${HOME}"
+rsync -avzh "${source_dir}/Calibre Library" "${HOME}"
+rsync -avzh "${source_dir}/Desktop" "${HOME}"
+rsync -avzh "${source_dir}/Documents" "${HOME}"
+# rsync -avzh "${source_dir}/Downloads" "${HOME}"
+rsync -avzh "${source_dir}/Music" "${HOME}"
+rsync -avzh "${source_dir}/Pictures" "${HOME}"
+rsync -avzh "${source_dir}/Projects" "${HOME}"
+rsync -avzh "${source_dir}/Videos" "${HOME}"
+# rsync -avzh "${source_dir}/VirtualBox VMs" "${HOME}"
+rsync -avzh "${source_dir}/backgrounds" "${local_share_dir}"
+rsync -avzh "${source_dir}/fonts" "${local_share_dir}"
+rsync -avzh "${source_dir}/gnote" "${local_share_dir}"
+rsync -avzh "${source_dir}/bypass-paywalls-chrome-master" "${local_share_dir}"
+
+# git
+rsync -avzh  "${source_dir}/.gitconfig" "${HOME}"
+rsync -avzh  "${source_dir}/.gitignore" "${HOME}"
+
+# npmrc
+rsync -avzh "${source_dir}/.npmrc" "${HOME}"
+
+# .ssh
+rsync -avzh  "${source_dir}/.ssh" "${HOME}"
+
+# sublime text
+rsync -avzh  "${source_dir}/sublime-text" "${config_dir}"
+
+# dbeaver data
+dbeaver_data_dir="${local_share_dir}/DBeaverData"
+mkdir -p ${dbeaver_data_dir}
+rsync -avzh "${source_dir}/dbeaver/Scripts" "${dbeaver_data_dir}"
+rsync -avzh "${source_dir}/dbeaver/.dbeaver" "${dbeaver_data_dir}"
+
+# tilix
+dconf load /com/gexperts/Tilix/ < "${source_dir}/tilix/tilix.dconf"
+
+# brave browser
+rsync -avzh "${source_dir}/Brave-Browser/Default" "${config_dir}/BraveSoftware/Brave-Browser"
+
+#############################################################################################
+# Gnome Extensions
+#############################################################################################
+
+# Restore gnome extension settings
+extension_settings --mode restore --backup-dir "${source_dir}/gnome-shell-extensions"
+
+# Enable gnome extensions
+eval "cd $gnome_extensions_dir && ls -d *" | while read gnome_extension || [[ -n $gnome_extension ]];
+do
+  printf "${YELLOW}=> Enabling ${gnome_extension}${NC}\n"
+  gnome-extensions enable ${gnome_extension}
+done
+
+#############################################################################################
+# Gnome Settings
+#############################################################################################
+
+# Keyboard Numlock
+gsettings set org.gnome.desktop.peripherals.keyboard numlock-state true
+
+# Mouse
+gsettings set org.gnome.desktop.peripherals.mouse accel-profile "flat"
+gsettings set org.gnome.desktop.peripherals.mouse natural-scroll true
+gsettings set org.gnome.desktop.peripherals.mouse speed 0.22794117647058831
+
+# Window Manager
+gsettings set org.gnome.mutter center-new-windows true
+gsettings set org.gnome.mutter dynamic-workspaces false
+gsettings set org.gnome.mutter edge-tiling false
+
+# Workspace
+num_workspaces=5
+
+gsettings set org.gnome.desktop.interface clock-format '12h'
+gsettings set org.gnome.desktop.interface clock-show-weekday true
+gsettings set org.gnome.desktop.interface document-font-name 'DejaVu Sans 11'
+gsettings set org.gnome.desktop.interface enable-animations false
+gsettings set org.gnome.desktop.interface enable-hot-corners false
+gsettings set org.gnome.desktop.interface font-name 'Inter Medium 10'
+gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark'
+gsettings set org.gnome.desktop.interface monospace-font-name 'DejaVu Sans Mono 11'
+gsettings set org.gnome.desktop.background picture-uri "file://${local_share_dir}/backgrounds/retro-monitors.png"
+gsettings set org.gnome.desktop.wm.preferences action-right-click-titlebar "menu"
+gsettings set org.gnome.desktop.wm.preferences button-layout "appmenu:close"
+gsettings set org.gnome.desktop.wm.preferences num-workspaces $num_workspaces
+gsettings set org.gnome.desktop.wm.preferences titlebar-font "Ubuntu Medium 10"
+gsettings set org.gnome.desktop.wm.preferences workspace-names "['❶', '❷', '❸', '❹', '❺']"
+
+gsettings set org.gnome.desktop.wm.keybindings minimize "['<Super>h']"
+gsettings set org.gnome.desktop.wm.keybindings switch-input-source "['<Super>slash', 'XF86Keyboard']"
+
+for i in $(seq 1 $num_workspaces); do
+  gsettings set org.gnome.desktop.wm.keybindings "switch-to-workspace-$i" "['<Super>$i']"
+  gsettings set org.gnome.desktop.wm.keybindings "move-to-workspace-$i" "['<Super><Shift>$i']"
+done
+
+# Favorite Apps
+gsettings set org.gnome.shell favorite-apps \
+  "['org.gnome.Nautilus.desktop', 'brave-browser.desktop', 'com.gexperts.Tilix.desktop', 'code.desktop', 'sublime_text.desktop', 'dbeaver.desktop', 'postman.desktop', 'spotify.desktop', 'deepin-picker.desktop', 'gnote.desktop', 'org.gnome.Gnote.desktop', 'gnome-control-center.desktop']"
+
+# Nautilus
+gsettings set org.gnome.nautilus.preferences default-folder-viewer 'list-view'
+gsettings set org.gnome.nautilus.preferences search-view 'list-view'
+gsettings set org.gnome.nautilus.preferences search-filter-time-type 'last_modified'
+gsettings set org.gnome.nautilus.list-view default-zoom-level 'small'
+gsettings set org.gnome.nautilus.list-view default-visible-columns "['name', 'size', 'date_modified', 'starred']"
+
+# Night Light
+gsettings set org.gnome.settings-daemon.plugins.color night-light-enabled true
+gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-automatic false
+gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-from 8.0
+gsettings set org.gnome.settings-daemon.plugins.color night-light-schedule-to 8.0
+gsettings set org.gnome.settings-daemon.plugins.color night-light-temperature 3700
+
+# Default Terminal
+gsettings set org.gnome.desktop.default-applications.terminal exec 'tilix'
