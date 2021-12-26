@@ -23,7 +23,7 @@ apt_repos:
     key_name: dbeaver
   - key: spotify
     source: http://repository.spotify.com stable non-free
-    key_url: https://download.spotify.com/debian/pubkey_0D811D58.gpg
+    key_url: https://download.spotify.com/debian/pubkey_5E3C45D7B312C643.gpg
     key_name: spotify
   - key: plexmediaserver
     source: https://downloads.plex.tv/repo/deb public main

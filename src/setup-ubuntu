@@ -47,9 +47,9 @@ function install_apt_packages() {
   if [[ $num_packages -gt 0 ]]; then
     printf "${YELLOW}Install APT packages${NC}\n"
 
-    for (( i = 0; i < $num_packages; i++ )); do
-      printf "${YELLOW}=> Installing ${CONFIG_apt_packages[i]}${NC}\n"
-      apt install -y "${CONFIG_apt_packages[i]}"
+    for apt_package in "${CONFIG_apt_packages[@]}"; do
+      printf "${YELLOW}=> Installing ${apt_package}${NC}\n"
+      apt install -y ${apt_package}
     done
   fi
 }
