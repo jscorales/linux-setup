@@ -3,8 +3,6 @@
 . "$(dirname "$0")/utils/common.sh"
 . "$(dirname "$0")/utils/gnome-extensions.sh"
 
-set -euo pipefail
-
 source_dir=${1-""}
 
 if [[ -z $source_dir ]]; then
@@ -64,7 +62,9 @@ rsync -avzh "${source_dir}/dbeaver/.dbeaver" "${dbeaver_data_dir}"
 dconf load /com/gexperts/Tilix/ < "${source_dir}/tilix/tilix.dconf"
 
 # brave browser
-rsync -avzh "${source_dir}/Brave-Browser/Default" "${config_dir}/BraveSoftware/Brave-Browser"
+brave_browser_dir="${config_dir}/BraveSoftware/Brave-Browser"
+mkdir -p ${brave_browser_dir}
+rsync -avzh "${source_dir}/Brave-Browser/Default" "${brave_browser_dir}"
 
 # restore zsh config
 cp "${source_dir}/.zshrc" "${HOME}/.zshrc"

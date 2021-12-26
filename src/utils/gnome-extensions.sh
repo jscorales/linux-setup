@@ -1,5 +1,7 @@
 #!/bin/bash
 
+gnome_extensions_dir="${HOME}/.local/share/gnome-shell/extensions"
+
 function install_extension() {
   local gnome_extensions_url="https://extensions.gnome.org/extension-data"
   local ext_name ext_package ext_uuid output_dir
@@ -29,11 +31,11 @@ function install_extension() {
   run_as_user "unzip -q -d ${output_dir} ${ext_package}"
   ext_uuid=$(cat "${output_dir}/metadata.json" | grep uuid | cut -d \" -f4)
 
-  if [[ ! -d ${GNOME_EXTENSIONS_DIR} ]]; then
-    run_as_user "mkdir -p ${GNOME_EXTENSIONS_DIR}"
+  if [[ ! -d ${gnome_extensions_dir} ]]; then
+    run_as_user "mkdir -p ${gnome_extensions_dir}"
   fi
 
-  run_as_user "mv ${output_dir} ${GNOME_EXTENSIONS_DIR}/${ext_uuid}"
+  run_as_user "mv ${output_dir} ${gnome_extensions_dir}/${ext_uuid}"
 
   rm $ext_package
 }
@@ -78,8 +80,10 @@ function extension_settings() {
     exit 1
   fi
 
-  for gnome_extension in $(find $GNOME_EXTENSIONS_DIR -mindepth 1 -maxdepth 1 -type d); do
-    schema_dir="${gnome_extensions_dir}/schemas"
+  for gnome_extension in $(find $gnome_extensions_dir -mindepth 1 -maxdepth 1 -type d); do
+    schema_dir="${gnome_extension}/schemas"
+    extension_name=$(basename $gnome_extension)
+
     if [[ -d $schema_dir ]]; then
       schema_file=$(find $schema_dir -path "*.gschema.xml" -type f)
       schema=""
@@ -106,9 +110,9 @@ function extension_settings() {
 
       if [[ $mode = ${valid_modes[0]} ]]; then
         mkdir -p $backup_dir
-        dconf dump "/${schema}/" > "${backup_dir}/${gnome_extension}.dconf"
+        dconf dump "/${schema}/" > "${backup_dir}/${extension_name}.dconf"
       elif [[ $mode = ${valid_modes[1]} ]]; then
-        cat "${backup_dir}/${gnome_extension}.dconf" | dconf load "/${schema}/"
+        cat "${backup_dir}/${extension_name}.dconf" | dconf load "/${schema}/"
       fi
     fi
   done

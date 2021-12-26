@@ -3,8 +3,6 @@
 . "$(dirname "$0")/utils/common.sh"
 . "$(dirname "$0")/utils/gnome-extensions.sh"
 
-set -euo pipefail
-
 old_ifs=$IFS
 IFS=$'\n\t'
 
@@ -31,12 +29,12 @@ dirs_to_backup=(
   "${HOME}/Calibre Library"
   "${HOME}/Desktop"
   "${HOME}/Documents"
-  "${HOME}/Downloads"
+  # "${HOME}/Downloads"
   "${HOME}/Music"
   "${HOME}/Pictures"
   "${HOME}/Projects"
   "${HOME}/Videos"
-  "${HOME}/VirtualBox VMs"
+  # "${HOME}/VirtualBox VMs"
   "${local_share_dir}/backgrounds"
   "${local_share_dir}/fonts"
   "${local_share_dir}/gnote"
@@ -45,7 +43,7 @@ dirs_to_backup=(
 
 # Backup directories
 for dir in ${dirs_to_backup[@]}; do
-  rsync -avzh --exclude={'node_modules', 'data-db'} --progress $dir $backup_dir
+  rsync -avzh --exclude 'node_modules' --exclude 'data-db' --progress $dir $backup_dir
 done
 
 # git
@@ -63,6 +61,7 @@ rsync -avzh "${HOME}/.zshrc" "${backup_dir}"
 rsync -avzh "${HOME}/.zshrc.pre-oh-my-zsh" "${backup_dir}"
 
 # pop-shell
+mkdir -p "${backup_dir}/pop-shell"
 rsync -avzh "${config_dir}/pop-shell/config.json" "${backup_dir}/pop-shell"
 
 # vscode
@@ -74,7 +73,7 @@ rsync -avzh "${config_dir}/Code/User/settings.json" "${backup_dir}/vscode"
 rsync -avzh "${config_dir}/sublime-text" "${backup_dir}"
 
 # dbeaver data
-dbeaver_data_dir="${local_share_dir}/DBeaverData"
+dbeaver_data_dir="${local_share_dir}/DBeaverData/workspace6/General"
 rsync -avzh "${dbeaver_data_dir}/Scripts" "${backup_dir}/dbeaver"
 rsync -avzh "${dbeaver_data_dir}/.dbeaver" "${backup_dir}/dbeaver"
 
@@ -89,4 +88,5 @@ dconf dump /com/gexperts/Tilix/ > "${backup_dir}/tilix/tilix.dconf"
 IFS=$old_ifs
 
 # gnome extensions
+mkdir -p "${backup_dir}/gnome-shell-extensions"
 extension_settings --mode backup --backup-dir "${backup_dir}/gnome-shell-extensions"

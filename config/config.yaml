@@ -68,6 +68,10 @@ gnome_extensions:
     name: ArcMenu
     package: arcmenuarcmenu.com.v17.shell-extension.zip
     schema: org.gnome.shell.extensions.arcmenu
+  - key: bluetooth-quick-connect
+    name: Bluetooth Quick Connect
+    package: bluetooth-quick-connectbjarosze.gmail.com.v13.shell-extension.zip
+    schema: org.gnome.shell.extensions.bluetooth-quick-connect
   - key: blur-my-shell
     name: Blur my Shell
     package: blur-my-shellaunetx.v22.shell-extension.zip
@@ -80,6 +84,14 @@ gnome_extensions:
     name: Floating Dock
     package: floating-docknandoferreira_profhotmail.com.v1.shell-extension.zip
     schema: org.gnome.shell.extensions.dash-to-dock
+  - key: open-weather
+    name: Open Weather
+    package: openweather-extensionjenslody.de.v105.shell-extension.zip
+    schema: org.gnome.shell.extensions.openweather
+  - key: remove-dropdown-arrows
+    name: Remove Dropdown Arrows
+    package: remove-dropdown-arrowsmpdeimos.com.v13.shell-extension.zip
+    schema:
   - key: sound-output-device-chooser
     name: Sound Input & Output Device Chooser
     package: sound-output-device-chooserkgshank.net.v38.shell-extension.zip
