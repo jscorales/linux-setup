@@ -1,7 +1,5 @@
 #!/bin/bash
 
-gnome_extensions_dir="${HOME}/.local/share/gnome-shell/extensions"
-
 function install_extension() {
   local gnome_extensions_url="https://extensions.gnome.org/extension-data"
   local ext_name ext_package ext_uuid output_dir
@@ -31,11 +29,11 @@ function install_extension() {
   run_as_user "unzip -q -d ${output_dir} ${ext_package}"
   ext_uuid=$(cat "${output_dir}/metadata.json" | grep uuid | cut -d \" -f4)
 
-  if [[ ! -d ${gnome_extensions_dir} ]]; then
-    run_as_user "mkdir -p ${gnome_extensions_dir}"
+  if [[ ! -d ${GNOME_EXTENSIONS_DIR} ]]; then
+    run_as_user "mkdir -p ${GNOME_EXTENSIONS_DIR}"
   fi
 
-  run_as_user "mv ${output_dir} ${gnome_extensions_dir}/${ext_uuid}"
+  run_as_user "mv ${output_dir} ${GNOME_EXTENSIONS_DIR}/${ext_uuid}"
 
   rm $ext_package
 }

@@ -1,7 +1,6 @@
 #!/bin/bash
 
 . "${BASH_SOURCE%/*}/common.sh"
-. "${BASH_SOURCE%/*}/config.sh"
 
 keyrings_dir="/usr/share/keyrings"
 keyring_suffix="-archive-keyring.gpg"
