@@ -1,7 +1,6 @@
 #!/bin/bash
 
 . "$(dirname "$0")/utils/common.sh"
-. "$(dirname "$0")/utils/config.sh"
 
 source_dir=${1-""}
 

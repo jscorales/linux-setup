@@ -46,6 +46,7 @@ function install_extension() {
 #                  directory when restoring settings
 ##################################################################
 function extension_settings() {
+  local gnome_extensions_dir="${HOME}/.local/share/gnome-shell/extensions"
   local valid_modes=(backup restore)
   local is_valid_mode mode backup_dir schema
 
