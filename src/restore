@@ -87,6 +87,12 @@ cp "${source_dir}/vscode/settings.json" "${source_dir}/Code/User/settings.json"
 # Restore gnome extension settings
 extension_settings --mode restore --backup-dir "${source_dir}/gnome-shell-extensions"
 
+# Disable gnome extensions if any
+for disabled_gnome_extension in ${CONFIG_disabled_gnome_extensions[@]}; do
+  printf "${YELLOW}=> Disabling ${disabled_gnome_extension}${NC}\n"
+  gnome-extensions disable ${disabled_gnome_extension}
+done
+
 # Enable gnome extensions
 eval "cd $gnome_extensions_dir && ls -d *" | while read gnome_extension || [[ -n $gnome_extension ]];
 do
@@ -138,8 +144,23 @@ for i in $(seq 1 $num_workspaces); do
 done
 
 # Favorite Apps
-gsettings set org.gnome.shell favorite-apps \
-  "['org.gnome.Nautilus.desktop', 'brave-browser.desktop', 'com.gexperts.Tilix.desktop', 'code.desktop', 'sublime_text.desktop', 'dbeaver.desktop', 'postman.desktop', 'spotify.desktop', 'deepin-picker.desktop', 'gnote.desktop', 'org.gnome.Gnote.desktop', 'gnome-control-center.desktop']"
+if [[ ${#CONFIG_favorite_apps[@]} -gt 0 ]]; then
+  favorite_apps=""
+
+  for app in ${CONFIG_favorite_apps[@]}; do
+    if [[ -z $favorite_apps ]]; then
+      favorite_apps="['${app}'"
+    else
+      favorite_apps="${favorite_apps}, '${app}'"
+    fi
+  done
+
+  if [[ ! -z $favorite_apps ]]; then
+    favorite_apps="${favorite_apps}]"
+  fi
+
+  gsettings set org.gnome.shell favorite-apps $favorite_apps
+fi
 
 # Nautilus
 gsettings set org.gnome.nautilus.preferences default-folder-viewer 'list-view'

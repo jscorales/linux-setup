@@ -112,3 +112,16 @@ gnome_extensions:
     name: Workspaces Bar
     package: workspaces-barfthx.v11.shell-extension.zip
     schema:
+disabled_gnome_extensions:
+favorite_apps:
+  - org.gnome.Nautilus.desktop
+  - brave-browser.desktop
+  - com.gexperts.Tilix.desktop
+  - code.desktop
+  - sublime_text.desktop
+  - dbeaver.desktop
+  - postman.desktop
+  - spotify.desktop
+  - gnote.desktop
+  - org.gnome.Gnote.desktop
+  - gnome-control-center.desktop
