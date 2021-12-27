@@ -22,10 +22,10 @@ function update_config() {
   local pop_shell_config_dir="${config_dir}/pop-shell"
   local pop_shell_config_file_backup="${source_dir}/pop-shell/config.json"
 
-  if [ -f "$pop_shell_config_file_backup"]; then
+  if [[ -f "$pop_shell_config_file_backup" ]]; then
     local float_classes=$(jq .float "$pop_shell_config_file_backup")
 
-    if [[ -z $float_classes ]]; then
+    if [[ ! -z $float_classes ]]; then
       # Backup existing config file
       cp "${pop_shell_config_dir}/config.json" "${pop_shell_config_dir}/config.json.bak" 2>/dev/null
       jq --argjson float_classes "${float_classes}" '.float += $float_classes' "${pop_shell_config_dir}/config.json" > "${pop_shell_config_dir}/config.json.tmp"

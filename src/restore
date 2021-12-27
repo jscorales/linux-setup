@@ -78,7 +78,8 @@ cp "${source_dir}/.zshrc.pre-oh-my-zsh" "${HOME}/.zshrc.pre-oh-my-zsh"
 while read vscode_extension || [[ -n $vscode_extension ]]; do
   code --install-extension ${vscode_extension} --force
 done < "${source_dir}/vscode/extensions.txt"
-cp "${source_dir}/vscode/settings.json" "${source_dir}/Code/User/settings.json"
+mkdir -p "${config_dir}/Code/User"
+cp "${source_dir}/vscode/settings.json" "${config_dir}/Code/User/settings.json"
 
 #############################################################################################
 # Gnome Extensions
@@ -159,7 +160,7 @@ if [[ ${#CONFIG_favorite_apps[@]} -gt 0 ]]; then
     favorite_apps="${favorite_apps}]"
   fi
 
-  gsettings set org.gnome.shell favorite-apps $favorite_apps
+  gsettings set org.gnome.shell favorite-apps "${favorite_apps}"
 fi
 
 # Nautilus
