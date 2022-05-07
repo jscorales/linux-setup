@@ -39,8 +39,8 @@ function update_settings() {
   # Update pop-shell settings
   gsettings set org.gnome.shell.extensions.pop-shell activate-launcher "['<Super>space']"
   gsettings set org.gnome.shell.extensions.pop-shell active-hint true
-  gsettings set org.gnome.shell.extensions.pop-shell gap-inner 3
-  gsettings set org.gnome.shell.extensions.pop-shell gap-outer 3
+  gsettings set org.gnome.shell.extensions.pop-shell gap-inner 4
+  gsettings set org.gnome.shell.extensions.pop-shell gap-outer 4
   gsettings set org.gnome.shell.extensions.pop-shell hint-color-rgba 'rgb(0,122,204)'
   gsettings set org.gnome.shell.extensions.pop-shell show-title false
 }

@@ -52,6 +52,15 @@ rsync -avzh  "${source_dir}/.ssh" "${HOME}"
 # sublime text
 rsync -avzh  "${source_dir}/sublime-text" "${config_dir}"
 
+# neofetch
+rsync -avzh "${source_dir}/neofetch" "${config_dir}"
+
+# flameshot
+rsync -avzh "${source_dir}/flameshot" "${config_dir}"
+
+# aws
+rsync -avzh "${source_dir}/.aws" "${config_dir}"
+
 # dbeaver data
 dbeaver_data_dir="${local_share_dir}/DBeaverData"
 mkdir -p ${dbeaver_data_dir}
@@ -60,6 +69,9 @@ rsync -avzh "${source_dir}/dbeaver/.dbeaver" "${dbeaver_data_dir}"
 
 # tilix
 dconf load /com/gexperts/Tilix/ < "${source_dir}/tilix/tilix.dconf"
+
+# pulse ui resources
+rsync -avzh "${backup_dir}/pulsesecure" /opt/pulsesecure
 
 # brave browser
 brave_browser_dir="${config_dir}/BraveSoftware/Brave-Browser"
@@ -128,13 +140,15 @@ gsettings set org.gnome.desktop.interface enable-animations false
 gsettings set org.gnome.desktop.interface enable-hot-corners false
 gsettings set org.gnome.desktop.interface font-name 'Inter Medium 10'
 gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark'
+gsettings set org.gnome.desktop.interface gtk-theme 'Colloid-dark'
 gsettings set org.gnome.desktop.interface monospace-font-name 'DejaVu Sans Mono 11'
-gsettings set org.gnome.desktop.background picture-uri "file://${local_share_dir}/backgrounds/retro-monitors.png"
+gsettings set org.gnome.desktop.background picture-uri "file://${local_share_dir}/backgrounds/space-rocket.png"
+gsettings set org.gnome.desktop.background picture-uri-dark "file://${local_share_dir}/backgrounds/space-rocket.png"
 gsettings set org.gnome.desktop.wm.preferences action-right-click-titlebar "menu"
 gsettings set org.gnome.desktop.wm.preferences button-layout "appmenu:close"
 gsettings set org.gnome.desktop.wm.preferences num-workspaces $num_workspaces
 gsettings set org.gnome.desktop.wm.preferences titlebar-font "Ubuntu Medium 10"
-gsettings set org.gnome.desktop.wm.preferences workspace-names "['❶', '❷', '❸', '❹', '❺']"
+gsettings set org.gnome.desktop.wm.preferences workspace-names "['🔴️', '🟠️', '🟡️', '🟢️', '🔵️']"
 
 gsettings set org.gnome.desktop.wm.keybindings minimize "['<Super>h']"
 gsettings set org.gnome.desktop.wm.keybindings switch-input-source "['<Super>slash', 'XF86Keyboard']"
@@ -179,3 +193,9 @@ gsettings set org.gnome.settings-daemon.plugins.color night-light-temperature 37
 
 # Default Terminal
 gsettings set org.gnome.desktop.default-applications.terminal exec 'tilix'
+
+# User theme
+gsettings set org.gnome.shell.extensions.user-theme name 'Solano-dark'
+
+# World clocks
+gsettings set org.gnome.shell.world-clocks locations "[<(uint32 2, <('Copenhagen', 'EKCH', true, [(0.97069395813527704, 0.22078415037728272)], [(0.97156662276127415, 0.2196205917248556)])>)>, <(uint32 2, <('Bangalore', 'VOBG', true, [(0.22601989378717041, 1.3555659188172149)], [(0.22631101470640302, 1.3537937114947398)])>)>, <(uint32 2, <('Manila', 'RPLL', false, [(0.2533636355656077, 2.1118483949131388)], [(0.2533636355656077, 2.1118483949131388)])>)>]"

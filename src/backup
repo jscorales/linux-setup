@@ -29,7 +29,7 @@ dirs_to_backup=(
   "${HOME}/Calibre Library"
   "${HOME}/Desktop"
   "${HOME}/Documents"
-  # "${HOME}/Downloads"
+  "${HOME}/Downloads"
   "${HOME}/Music"
   "${HOME}/Pictures"
   "${HOME}/Projects"
@@ -43,7 +43,7 @@ dirs_to_backup=(
 
 # Backup directories
 for dir in ${dirs_to_backup[@]}; do
-  rsync -avzh --exclude 'node_modules' --exclude 'data-db' --progress $dir $backup_dir
+  rsync -avzh --exclude 'node_modules' --exclude 'data-db' --exclude 'venv' --progress $dir $backup_dir
 done
 
 # git
@@ -72,6 +72,15 @@ rsync -avzh "${config_dir}/Code/User/settings.json" "${backup_dir}/vscode"
 # sublime text
 rsync -avzh "${config_dir}/sublime-text" "${backup_dir}"
 
+# neofetch
+rsync -avzh "${config_dir}/neofetch" "${backup_dir}"
+
+# flameshot
+rsync -avzh "${config_dir}/flameshot" "${backup_dir}"
+
+# aws
+rsync -avzh "${config_dir}/.aws" "${backup_dir}"
+
 # dbeaver data
 dbeaver_data_dir="${local_share_dir}/DBeaverData/workspace6/General"
 rsync -avzh "${dbeaver_data_dir}/Scripts" "${backup_dir}/dbeaver"
@@ -84,6 +93,10 @@ rsync -avzh "${config_dir}/BraveSoftware/Brave-Browser/Default" "${backup_dir}/B
 # tilix
 mkdir -p "${backup_dir}/tilix"
 dconf dump /com/gexperts/Tilix/ > "${backup_dir}/tilix/tilix.dconf"
+
+# pulse ui resources
+mkdir -p "${backup_dir}/pulsesecure/resource"
+rsync -avzh /opt/pulsesecure "${backup_dir}/pulsesecure"
 
 IFS=$old_ifs
 
