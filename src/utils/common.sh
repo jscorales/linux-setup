@@ -1,11 +1,13 @@
 #!/bin/bash
 
-declare -g TARGET_USER LOCAL_SHARE_DIR CONFIG_DIR DBEAVER_DATA_DIR
+declare -g OS_RELEASE_VERSION TARGET_USER LOCAL_SHARE_DIR CONFIG_DIR DBEAVER_DATA_DIR
 
 RED="\033[0;31m"
 NC="\033[0m" # No Color
 GREEN="\033[0;32m"
 YELLOW="\033[1;33m"
+
+OS_RELEASE_VERSION=$(lsb_release -r | sed -e 's/Release:[[:space:]]*//')
 
 function is_sudo() {
   if [[ $EUID -ne 0 ]]; then

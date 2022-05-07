@@ -53,6 +53,7 @@ function __add_repository_key() {
 function add_apt_repository() {
   local apt_sources_dir="/etc/apt/sources.list.d"
   local repo_name repo_source key_name key_url
+  local has_public_key=false
 
   while [ "${1}" != "" ]; do
     case $1 in
@@ -80,12 +81,22 @@ function add_apt_repository() {
     shift
   done
 
-  __add_repository_key \
-    --key-name "$key_name" \
-    --key-url "$key_url"
+  if [[ -n $key_name ]] && [[ -n $key_url ]]; then
+    has_public_key=true
+  fi
+
+  if [[ $has_public_key ]]; then
+    __add_repository_key \
+      --key-name "$key_name" \
+      --key-url "$key_url"
+  fi
 
   printf "Adding ${repo_name} source... "
-  echo "deb [arch=amd64 signed-by=${keyrings_dir}/${key_name}${keyring_suffix}] ${repo_source}" |
-    sudo tee "${apt_sources_dir}/${repo_name}.list"
+  if [[ ! $has_public_key ]]; then
+    echo "deb [trusted=true] ${repo_source}" | sudo tee "${apt_sources_dir}/${repo_name}.list"
+  else
+    echo "deb [arch=amd64 signed-by=${keyrings_dir}/${key_name}${keyring_suffix}] ${repo_source}" |
+      sudo tee "${apt_sources_dir}/${repo_name}.list"
+  fi
   printf "OK\n"
 }

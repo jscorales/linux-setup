@@ -34,9 +34,15 @@ function add_apt_repositories() {
   # Add source preference(s)
   if [ -d $source_pref_dir ]; then
     for pref_file in "${source_pref_dir}/*"; do
-      run_as_user "cp $pref_file /etc/apt/preferences.d/$(basename $pref_file)"
+      "cp $pref_file /etc/apt/preferences.d/$(basename $pref_file)"
     done
   fi
+
+  # Add Microsoft package repo
+  local ms_package="packages-microsoft-prod.deb"
+  wget "https://packages.microsoft.com/config/ubuntu/${OS_RELEASE_VERSION}/${ms_package}" -O $ms_package
+  dpkg -i $ms_package
+  rm ${ms_package}
 
   apt update
 }
@@ -84,17 +90,19 @@ function install_prerequisites() {
 function install_other_packages() {
   # Docker Compose
   printf "${YELLOW}Installing docker compose${NC}\n"
+  mkdir -p /usr/local/lib/docker/cli-plugins
   curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" \
-    -o /usr/local/bin/docker-compose
-  chmod +x /usr/local/bin/docker-compose
+    -o /usr/local/lib/docker/cli-plugins/docker-compose
+  chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
   # Docker user group
+  groupadd docker
   usermod -aG docker $USER
   # Copy docker daemon config
   cp ./docker/daemon.json /etc/docker/daemon.json
 
   # Slack
   printf "${YELLOW}Installing Slack${NC}\n"
-  wget -qO slack-desktop.deb https://downloads.slack-edge.com/linux_releases/slack-desktop-4.19.2-amd64.deb
+  wget -qO slack-desktop.deb https://downloads.slack-edge.com/releases/linux/4.25.0/prod/x64/slack-desktop-4.25.0-amd64.deb
   sudo apt install ./slack-desktop.deb -y
   rm ./slack-desktop.deb
 
@@ -109,9 +117,9 @@ function install_other_packages() {
 
   # Pulse UI
   printf "${YELLOW}Installing Pulse UI ${NC}\n"
-  run_as_user "cp ./pulse/Pulse-linux-9.1r11.0-64bit.deb ./Pulse-linux-9.1r11.0-64bit.deb"
-  apt install ./Pulse-linux-9.1r11.0-64bit.deb -y
-  rm ./Pulse-linux-9.1r11.0-64bit.deb
+  run_as_user "cp ./pulse/pulsesecure_9.1.R14_amd64.deb ./pulsesecure_9.1.R14_amd64.deb"
+  apt install ./pulsesecure_9.1.R14_amd64.deb -y
+  rm ./pulsesecure_9.1.R14_amd64.deb
 
   # Robo 3T
   printf "${YELLOW}Installing Robo 3T ${NC}\n"
@@ -129,6 +137,12 @@ function install_other_packages() {
   printf "${YELLOW}Installing Calibre ${NC}\n"
   sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
 
+  # AWS CLI v2
+  printf "${YELLOW}Installing AWS CLI v2 ${NC}\n"
+  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+  unzip awscliv2.zip
+  ./aws/install
+
   # Setup Zsh
   printf "${YELLOW}Setting up Zsh ${NC}\n"
   chsh -s /bin/zsh $TARGET_USER
@@ -143,7 +157,7 @@ function install_other_packages() {
 
   # NVM
   printf "${YELLOW}Installing nvm${NC}\n"
-  run_as_user "wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | zsh"
+  run_as_user "wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | zsh"
 
   # Node 12
   # printf "${YELLOW}Installing node 12${NC}\n"

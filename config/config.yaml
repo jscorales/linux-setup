@@ -5,14 +5,6 @@ drives:
     fs_type: auto
     options: nosuid,nodev,nofail,x-gvfs-show
 apt_repos:
-  - key: vscode
-    source: https://packages.microsoft.com/repos/vscode stable main
-    key_url: https://packages.microsoft.com/keys/microsoft.asc
-    key_name: microsoft
-  - key: sublime-text
-    source: https://download.sublimetext.com/ apt/stable/
-    key_url: https://download.sublimetext.com/sublimehq-pub.gpg
-    key_name: sublime-text
   - key: brave-browser
     source: https://brave-browser-apt-release.s3.brave.com/ stable main
     key_url: https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
@@ -21,18 +13,30 @@ apt_repos:
     source: https://dbeaver.io/debs/dbeaver-ce /
     key_url: https://dbeaver.io/debs/dbeaver.gpg.key
     key_name: dbeaver
-  - key: spotify
-    source: http://repository.spotify.com stable non-free
-    key_url: https://download.spotify.com/debian/pubkey_5E3C45D7B312C643.gpg
-    key_name: spotify
-  - key: plexmediaserver
-    source: https://downloads.plex.tv/repo/deb public main
-    key_url: https://downloads.plex.tv/plex-keys/PlexSign.key
-    key_name: plexmediaserver
   - key: docker
     source: https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable
     key_url: https://download.docker.com/linux/ubuntu/gpg
     key_name: docker
+  - key: notion-repackaged
+    source: https://apt.fury.io/notion-repackaged/ /
+    key_url:
+    key_name:
+  - key: plexmediaserver
+    source: https://downloads.plex.tv/repo/deb public main
+    key_url: https://downloads.plex.tv/plex-keys/PlexSign.key
+    key_name: plexmediaserver
+  - key: spotify
+    source: http://repository.spotify.com stable non-free
+    key_url: https://download.spotify.com/debian/pubkey_5E3C45D7B312C643.gpg
+    key_name: spotify
+  - key: sublime-text
+    source: https://download.sublimetext.com/ apt/stable/
+    key_url: https://download.sublimetext.com/sublimehq-pub.gpg
+    key_name: sublime-text
+  - key: vscode
+    source: https://packages.microsoft.com/repos/vscode stable main
+    key_url: https://packages.microsoft.com/keys/microsoft.asc
+    key_name: microsoft
 apt_ppa_repos:
   - ppa:papirus/papirus
 apt_packages:
@@ -40,6 +44,7 @@ apt_packages:
   - gir1.2-gtop-2.0
   - lm-sensors
   - gir1.2-gmenu-3.0
+  - gir1.2-gst-plugins-base-1.0
   - htop
   - zsh
   - neofetch
@@ -51,12 +56,16 @@ apt_packages:
   - tilix
   - code
   - sublime-text
+  - dotnet-sdk-6.0
+  - python3-pip
   - brave-browser
   - docker-ce
   - docker-ce-cli
   - containerd.io
+  - docker-compose-plugin
   - dbeaver-ce
   - gnote
+  - notion-app
   - flameshot
   - meld
   - spotify-client
@@ -76,6 +85,18 @@ gnome_extensions:
     name: Blur my Shell
     package: blur-my-shellaunetx.v22.shell-extension.zip
     schema: org.gnome.shell.extensions.blur-my-shell
+  - key: burn-my-windows
+    name: Burn My Windows
+    package: burn-my-windowsschneegans.github.com.v15.shell-extension.zip
+    schema: org.gnome.shell.extensions.burn-my-windows
+  - key: color-picker
+    name: Color Picker
+    package: color-pickertuberry.v12.shell-extension.zip
+    schema: org.gnome.shell.extensions.color-picker
+  - key: compiz-magic-lamp-effect
+    name: Compiz alike magic lamp effect
+    package: compiz-alike-magic-lamp-effecthermes83.github.com.v11.shell-extension.zip
+    schema: org.gnome.shell.extensions.com.github.hermes83.compiz-alike-magic-lamp-effect
   - key: emoji-selector
     name: Emoji Selector
     package: emoji-selectormaestroschan.fr.v20.shell-extension.zip
@@ -84,6 +105,10 @@ gnome_extensions:
     name: Floating Dock
     package: floating-docknandoferreira_profhotmail.com.v1.shell-extension.zip
     schema: org.gnome.shell.extensions.dash-to-dock
+  - key: internet-radio
+    name: Internet Radio
+    package: radiohslbck.gmail.com.v14.shell-extension.zip
+    schema: org.gnome.shell.extensions.radio
   - key: open-weather
     name: Open Weather
     package: openweather-extensionjenslody.de.v105.shell-extension.zip
@@ -119,9 +144,10 @@ favorite_apps:
   - com.gexperts.Tilix.desktop
   - code.desktop
   - sublime_text.desktop
-  - dbeaver.desktop
+  - dbeaver-ce.desktop
   - postman.desktop
   - spotify.desktop
   - gnote.desktop
   - org.gnome.Gnote.desktop
+  - notion-app.desktop
   - gnome-control-center.desktop
